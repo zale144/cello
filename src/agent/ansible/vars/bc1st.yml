@@ -7,7 +7,7 @@ GIT_URL: "http://gerrit.hyperledger.org/r/fabric"
 # GERRIT_REFSPEC: "refs/changes/47/12047/3" # 1.0.1
 # GERRIT_REFSPEC: "refs/changes/13/13113/1"
 # GERRIT_REFSPEC: "refs/tags/v1.0.4" # 1.0.4
-GERRIT_REFSPEC: "refs/tags/v1.0.5" # 1.0.5
+GERRIT_REFSPEC: "refs/tags/v1.2.0" # 1.2.0
 
 # This variable defines fabric network attributes
 fabric: {
@@ -20,14 +20,14 @@ fabric: {
   # options are "true", "false", "client" default is true
   tls: false,
   generate_certs: true,
-  logging_level: "ERROR",
+  logging_level: "DEBUG",
   k8s: {
     exposeserviceport: False,
     storageclass: "default",
     storagecapacity: "2Gi",
     shared_storage: false,
-    mem_req: "512Mi",
-    mem_limit: "1024Mi",
+    mem_req: "256Mi",
+    mem_limit: "512Mi",
     cpu_req: "0.1",
     cpu_limit: "0.2"
   },
@@ -40,21 +40,21 @@ fabric: {
   # all names must be in lower case. Numeric characters cannot be used to start
   # or end a name. Character dot (.) can only be used in names of peers and orderers.
   network: {
-    fabric001: {
+    ip-10-0-0-189: {
       cas: ["ca1st.orga"],
       peers: ["anchor@peer1st.orga", "anchor@peer1st.orgb"],
       orderers: ["orderer1st.orgc", "orderer1st.orgd"],
       zookeepers: ["zookeeper1st"],
       kafkas: ["kafka1st"]
     },
-    fabric002: {
+    ip-10-0-0-175: {
       cas: ["ca1st.orgb"],
       peers: ["worker@peer2nd.orga", "worker@peer2nd.orgb"],
       orderers: ["orderer2nd.orgc", "orderer2nd.orgd"],
       zookeepers: ["zookeeper2nd"],
       kafkas: ["kafka2nd"]
     },
-    fabric003: {
+    ip-10-0-0-89: {
       cas: ["ca1st.orgc", "ca1st.orgd"],
       peers: ["worker@peer3rd.orga", "worker@peer3rd.orgb"],
       orderers: [],
@@ -74,13 +74,13 @@ fabric: {
   #     s390x-0.4.2                                # release 0.4.2 for s390x
   #     048c91eb47812582f36665fbea3d7e0e68e396bf   # commit build
   #     x86_64-1.0.0-snapshot-8d3275f              # snapshot build
-  baseimage_tag: "amd64-1.1.0",
+  baseimage_tag: "latest",
 
   # The container tag for accessory fabric components such as ca, kafka,
   # zookeeper and couchdb. It has to be the full tag just like the
   # baseimage_tag
-  helper_tag: "amd64-0.4.8",
-  ca: { admin: "admin", adminpw: "adminpw", image_tag: "amd64-1.1.0" },
+  helper_tag: "amd64-0.4.12",
+  ca: { admin: "admin", adminpw: "adminpw", image_tag: "1.2.0" },
 
   # Only use this field when you have a docker repository.
   repo: {
@@ -94,6 +94,6 @@ fabric: {
     # locations to download fabric binaries. This url should point to a
     # compressed such as tar or zip file which contains necessary binaries
     # such as configtxgen, configtxlator, cryptogen etc.
-    bin: "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/linux-amd64-1.1.0/hyperledger-fabric-linux-amd64-1.1.0.tar.gz"
+    bin: "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/linux-amd64-1.2.0/hyperledger-fabric-linux-amd64-1.2.0.tar.gz"
   }
 }

@@ -58,12 +58,12 @@ cluster: {
   # each machine will be named ${name_prefix}001 to ${name_prefix}${stack_size}
   stack_size: 3,
 
-  etcdnodes: ["fabric001", "fabric002", "fabric003"],
-  builders: ["fabric001"],
+  etcdnodes: ["ip-10-0-0-189", "ip-10-0-0-175", "ip-10-0-0-89"],
+  builders: ["ip-10-0-0-189"],
 
   flannel_repo: "https://github.com/coreos/flannel/releases/download/v0.10.0/flannel-v0.10.0-linux-amd64.tar.gz",
   etcd_repo: "https://github.com/coreos/etcd/releases/download/v3.3.2/etcd-v3.3.2-linux-amd64.tar.gz",
-  k8s_repo: "https://storage.googleapis.com/kubernetes-release/release/v1.9.1/bin/linux/amd64/",
+  k8s_repo: "https://storage.googleapis.com/kubernetes-release/release/v1.10.3/bin/linux/amd64/",
   go_repo: "https://dl.google.com/go/go1.9.2.linux-amd64.tar.gz",
 
   # If volume want to be used, specify a size in GB, make volume size 0 if wish

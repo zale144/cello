@@ -3,7 +3,7 @@
   "x-type": "hlfv1",
   "version": "1.0.0",
   "client": {
-    "organization": "{{ item }}",
+    "organization": "{{ item }}MSP",
     "connection": {
       "timeout": {
         "peer": { "endorser": "300", "eventHub": "300", "eventReg": "300"},
@@ -29,7 +29,7 @@
   },
   "organizations": {
 {% for org in allorgs %}
-    "{{ org }}": {
+    "{{ org }}MSP": {
       "mspid": "{{ org }}",
       "peers": [
 {% for peer in allpeers|selectattr('org', 'equalto', org)|list %}

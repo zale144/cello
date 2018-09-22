@@ -17,7 +17,7 @@
 
 - name: Generate all admin options
   set_fact:
-    alladmin: "{{ alladmin + '-A ' + item + 'Admin -C /home/composer/.composer/' + item + 'Admin/admin-pub.pem ' }}"
+    alladmin: "{{ alladmin + '-A ' + item + 'Admin -C /home/composer/' + item + 'Admin/admin-pub.pem ' }}"
   with_items: "{{ peerorgs }}"
   tags: "generatealladmin"
 
@@ -50,7 +50,7 @@
 - name: Clean composer root
   command: >-
     ./kubectl --kubeconfig kubeconfig exec composercli
-    -- /bin/rm -rf /home/composer/.composer/{{ item }}
+    -- /bin/rm -rf /home/composer/.composer/{{ item }} /home/composer/{{ item }}
   with_items:
     - "cards"
     - "client-data"
@@ -77,7 +77,7 @@
   command: >-
     ./kubectl --kubeconfig kubeconfig exec composercli -- composer card import
     -f /home/composer/.composer/{{ item }}-PeerAdmin.card
-    -n PeerAdmin@{{ item }}
+    --card PeerAdmin@{{ item }}
   args:
     chdir: "{{ playbook_dir }}/../../vars/"
   with_items: "{{ peerorgs }}"
@@ -85,8 +85,9 @@
 
 - name: Runtime install
   command: >-
-    ./kubectl --kubeconfig kubeconfig exec composercli -- composer runtime install
-    -c PeerAdmin@{{ item }} -n {{ networkname }}
+    ./kubectl --kubeconfig kubeconfig exec composercli -- composer network install
+    --card PeerAdmin@{{ item }}
+    --archiveFile /fabriccerts/keyfiles/{{ networkname }}.bna
   args:
     chdir: "{{ playbook_dir }}/../../vars/"
   with_items: "{{ peerorgs }}"
@@ -97,7 +98,7 @@
     ./kubectl --kubeconfig kubeconfig exec composercli -- composer identity request
     -c PeerAdmin@{{ item }}
     -u {{ fabric.ca.admin }} -s {{ fabric.ca.adminpw }}
-    -d /home/composer/.composer/{{ item }}Admin
+    -d {{ item }}Admin
   args:
     chdir: "{{ playbook_dir }}/../../vars/"
   with_items: "{{ peerorgs }}"
@@ -107,7 +108,8 @@
   command: >-
     ./kubectl --kubeconfig kubeconfig exec composercli -- composer network start
     -c PeerAdmin@{{ peerorgs[0] }}
-    -a /fabriccerts/keyfiles/{{ networkname }}.bna {{ alladmin }}
+    -n {{ networkname }} -V 0.2.3-20180314171154
+     {{ alladmin }}
   args:
     chdir: "{{ playbook_dir }}/../../vars/"
   tags: "startnetwork"
@@ -116,10 +118,11 @@
   command: >-
     ./kubectl --kubeconfig kubeconfig exec composercli -- composer card create
     -p /fabriccerts/keyfiles/{{ item }}/connection.json
-    -u {{ item }}Admin -n {{ networkname }}
-    -c /home/composer/.composer/{{ item }}Admin/admin-pub.pem
-    -k /home/composer/.composer/{{ item }}Admin/admin-priv.pem
-    -f /home/composer/.composer/{{ item}}Admin/{{ item }}-{{ networkname }}-Admin.card
+    -u {{ item }}Admin 
+    -n {{ networkname }}
+    -c /home/composer/{{ item }}Admin/admin-pub.pem
+    -k /home/composer/{{ item }}Admin/admin-priv.pem
+    -f /home/composer/{{ item}}Admin/{{ item }}-{{ networkname }}-Admin.card
   args:
     chdir: "{{ playbook_dir }}/../../vars/"
   with_items: "{{ peerorgs }}"
@@ -128,7 +131,7 @@
 - name: Import the admin cards
   command: >-
     ./kubectl --kubeconfig kubeconfig exec composercli -- composer card import
-    -f /home/composer/.composer/{{ item }}Admin/{{ item }}-{{ networkname }}-Admin.card
+    -f /home/composer/{{ item }}Admin/{{ item }}-{{ networkname }}-Admin.card
   args:
     chdir: "{{ playbook_dir }}/../../vars/"
   with_items: "{{ peerorgs }}"
