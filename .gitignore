@@ -196,6 +196,6 @@ jspm_packages
 !/**/lib
 
 # Ansible modules
-src/agent/ansible/run/*
+#src/agent/ansible/run/*
 src/agent/ansible/vars/*
 src/agent/ansible/*.retry
