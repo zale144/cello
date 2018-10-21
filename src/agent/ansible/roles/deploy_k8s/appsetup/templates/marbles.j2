@@ -1,0 +1,40 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: marbles-demo
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: marbles-demo
+    spec:
+      volumes:
+      - name: task-pv-storage
+        persistentVolumeClaim:
+          claimName: fabriccerts
+      containers:
+      - name: marbles-demo
+        image: livelance/marbles:v4
+        imagePullPolicy: Always
+        command: ["sh", "-c", "cp /fabriccerts/keyfiles/marbles-connection.json /app/config/byfn-network.json && node scripts/install_chaincode.js && sleep 10s  && node scripts/instantiate_chaincode.js && sleep 10s && gulp marbles_byfn"]
+        volumeMounts:
+        - mountPath: "/fabriccerts"
+          name: task-pv-storage
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: marbles-service
+  labels:
+    run: marbles-demo
+spec:
+  type: NodePort
+  selector:
+    name: marbles-demo
+  ports:
+  - protocol: TCP
+    port: 3001
+    nodePort: 32001
+    name: http

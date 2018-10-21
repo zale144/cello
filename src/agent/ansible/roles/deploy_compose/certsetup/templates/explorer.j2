@@ -1,0 +1,96 @@
+ {
+  "network-configs": {
+    "network-1": {
+      "version": "1.0",
+      "clients": {
+        "client-1": {
+          "tlsEnable": false,
+          "organization": "{{ peerorgs[0] }}",
+          "channel": "firstchannel",
+          "credentialStore": {
+            "path": "{{ './tmp/credentialStore_'+peerorgs[0]+'/credential' }}",
+            "cryptoStore": {
+              "path": "{{ './tmp/credentialStore_'+peerorgs[0]+'/crypto' }}"
+            }
+          }
+        }
+      },
+      "channels": {
+        "firstchannel": {
+          "peers": {
+{% for peer in allpeers %}
+               "{{ peer.name }}": {
+               "endorsingPeer": true, "chaincodeQuery": true, "eventSource": true
+              }{{ '' if loop.last else ',' }}
+{% endfor %}
+          },
+          "connection": {
+            "timeout": {
+              "peer": {
+                "endorser": "6000",
+                "eventHub": "6000",
+                "eventReg": "6000"
+              }
+            }
+          }
+        }
+      },
+      "organizations": {
+{% for org in allorgs %}
+        "{{ org }}": {
+            "mspid": "{{ org }}",
+            "peers": [
+{% for peer in allpeers|selectattr('org', 'equalto', org)|list %}
+        "{{ peer.name }}"{{ '' if loop.last else ',' }}
+{% endfor %}
+            ],
+            "certificateAuthorities": [
+{% for ca in allcas|selectattr('org', 'equalto', org)|list %}
+        "{{ ca.name }}"{{ '' if loop.last else ',' }}
+{% endfor %}
+            ],
+            "x-certJson": {
+                "path": "/root/.hfc-key-store"
+            },
+            "signedCert": {
+                  "path": "{{ fabricworkdir+'/run/keyfiles/'+org+'/users/Admin@'+org+'/msp/admincerts/' }}"
+            },
+            "adminPrivateKey": {
+                  "path": "{{ fabricworkdir+'/run/keyfiles/'+org+'/users/Admin@'+org+'/msp/keystore/' }}"
+            }
+        }{{ '' if loop.last else ',' }}
+{% endfor %}
+      },
+      "peers": {
+{% for peer in allpeers|selectattr('org', 'equalto', item)|list %}
+    "{{ peer.name }}": {
+      "url": "{{ tls|ternary('grpcs','grpc') }}://{{ peer.name }}:7051",
+      "eventUrl": "{{ tls|ternary('grpcs','grpc') }}://{{ peer.name }}:7053",
+      "grpcOptions": {
+        "ssl-target-name-override": "{{ peer.name }}"
+      },
+      "tlsCACerts": {
+        "pem": "{{ fabricworkdir+'/run/keyfiles/'+peer.org+'/tlsca/tlsca.'+peer.org+'-cert.pem' }}"
+      }
+    }{{ '' if loop.last else ',' }}
+{% endfor %}
+        },
+        "orderers": {
+{% for orderer in allorderers %}
+    "{{ orderer.name }}": {
+      "url": "{{ tls|ternary('grpcs','grpc') }}://{{ orderer.name }}:7050",
+      "grpcOptions": {
+        "ssl-target-name-override": "{{ orderer.name }}"
+      },
+      "tlsCACerts": {
+        "pem": "{{ fabricworkdir+'/run/keyfiles/'+orderer.org+'/orderers/'+orderer.name+'.'+orderer.org+'/tls/ca.crt' }}"
+      }
+    }{{ '' if loop.last else ',' }}
+{% endfor %}
+        }
+      }
+  },
+  "configtxgenToolPath": "{{ fabricworkdir+'/run/keyfiles' }}",
+  "license": "Apache-2.0"
+}
+

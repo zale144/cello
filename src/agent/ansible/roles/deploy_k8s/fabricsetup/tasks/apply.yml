@@ -8,8 +8,10 @@
     dest: "{{ pjrun }}/{{ item }}.yaml"
   with_items:
     - pvc
+    - pv
     - certssetup
     - cli-k8s
+    - cli-k8s1
     - chainep
 
 - name: Create peer org member string
@@ -24,7 +26,7 @@
     mode: "u=rx,g=rx"
   when: (allorderers | length > 0) and (allpeers | length > 0)
 
-- name: Create persistent volume
+- name: Create persistent volume claim
   command: >-
     ./kubectl --kubeconfig kubeconfig apply -f {{ pjrun }}/pvc.yaml
   args:
@@ -204,6 +206,20 @@
   register: dindpods
   tags: "downloadccenv"
 
+- name: Start Cli
+  command: "./kubectl --kubeconfig kubeconfig apply -f {{ pjrun }}/cli-k8s.yaml"
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  tags: "channeloperation"
+  when: (allorderers | length > 0) and (allpeers | length > 0)
+
+- name: Setup Permanent Cli
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create -f {{ pjrun }}/cli-k8s1.yaml
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  tags: "setupcli"
+  
 - name: Download chaincode container image
   command: >-
     ./kubectl --kubeconfig kubeconfig exec {{ item }} --
@@ -213,13 +229,6 @@
   with_items: "{{ dindpods.stdout_lines }}"
   when: allpeers | length > 0
   tags: "downloadccenv"
-
-- name: Start channel operations
-  command: "./kubectl --kubeconfig kubeconfig apply -f {{ pjrun }}/cli-k8s.yaml"
-  args:
-    chdir: "{{ playbook_dir }}/../../vars/"
-  tags: "channeloperation"
-  when: (allorderers | length > 0) and (allpeers | length > 0)
 
 - name: Wait for channel operation pod to complete
   command: >-
@@ -232,3 +241,4 @@
   when: (allorderers | length > 0) and (allpeers | length > 0)
   retries: 50
   delay: 5
+  

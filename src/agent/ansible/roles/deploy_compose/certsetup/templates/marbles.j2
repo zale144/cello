@@ -1,49 +1,65 @@
 {
-  "name": "{{ item }}-network",
-  "x-type": "hlfv1",
-  "version": "1.0.0",
-  "client": {
-    "organization": "{{ item }}MSP",
+    "name": "orga-network",
+    "x-type": "hlfv1",
+    "version": "1.0.0",
+    "client": {
+    "organization": "{{ peerorgs[0] }}",
+    "credentialStore": {
+           "path": "/root/.hfc-key-store"
+    },
     "connection": {
       "timeout": {
         "peer": { "endorser": "300", "eventHub": "300", "eventReg": "300"},
         "orderer": "300"
       }
     }
-  },
-  "channels": {
-    "firstchannel": {
-      "orderers": [
+    },
+    "channels": {
+        "firstchannel": {
+            "orderers": [
 {% for orderer in allorderers %}
         "{{ orderer.name }}"{{ '' if loop.last else ',' }}
 {% endfor %}
-      ],
-      "peers": {
+            ],
+            "peers": {
 {% for peer in allpeers %}
         "{{ peer.name }}": {
           "endorsingPeer": true, "chaincodeQuery": true, "eventSource": true
         }{{ '' if loop.last else ',' }}
 {% endfor %}
-      }
-    }
-  },
-  "organizations": {
+            },
+            "chaincodes": [
+              "marbles:v4"
+            ],
+            "x-blockDelay": 1000
+        }
+    },
+    "organizations": {
 {% for org in allorgs %}
-    "{{ org }}MSP": {
-      "mspid": "{{ org }}",
-      "peers": [
+        "{{ org }}": {
+            "mspid": "{{ org }}MSP",
+            "peers": [
 {% for peer in allpeers|selectattr('org', 'equalto', org)|list %}
         "{{ peer.name }}"{{ '' if loop.last else ',' }}
 {% endfor %}
-      ],
-      "certificateAuthorities": [
+            ],
+            "certificateAuthorities": [
 {% for ca in allcas|selectattr('org', 'equalto', org)|list %}
         "{{ ca.name }}"{{ '' if loop.last else ',' }}
 {% endfor %}
-      ]
-    }{{ '' if loop.last else ',' }}
+            ],
+            "x-certJson": {
+                "path": "/root/.hfc-key-store"
+            },
+            "signedCert": {
+                  "path": "{{ fabricworkdir+'/run/keyfiles/'+org+'/users/Admin@'+org+'/msp/admincerts/' }}"
+            },
+            "adminPrivateKey": {
+                  "path": "{{ fabricworkdir+'/run/keyfiles/'+org+'/users/Admin@'+org+'/msp/keystore/' }}"
+            }
+        }{{ '' if loop.last else ',' }}
 {% endfor %}
-  },
+    },
   "orderers": {
 {% for orderer in allorderers %}
     "{{ orderer.name }}": {
@@ -76,8 +92,14 @@
     "{{ ca.name }}": {
       "url": "{{ tls|ternary('https','http') }}://{{ca.name}}:7054",
       "caName": "{{ ca.name }}",
-      "httpOptions": {"verify": false}
+      "httpOptions": {"verify": false},
+      "registrar": [
+            {
+               "enrollId": "admin",
+               "enrollSecret": "adminpw"
+            }
+        ]
     }{{ '' if loop.last else ',' }}
 {% endfor %}
   }
-}
+} 

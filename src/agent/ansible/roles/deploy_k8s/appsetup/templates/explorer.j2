@@ -1,0 +1,63 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+   name: fabric-explorer
+spec:
+  replicas: 1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+       name: fabric-explorer
+    spec:
+      containers:
+        - name: explorer-db
+          image: livelance/explorer-db
+          ports:
+            - containerPort: 5432
+          env:
+          - name: DATABASE_PASSWORD
+            value: password
+          - name: DATABASE_DATABASE
+            value: fabricexplorer
+          - name: DATABASE_USERNAME
+            value: hppoc
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 30s; /opt/createdb.sh"]
+        - name: fabric-explorer
+          imagePullPolicy: Always
+          image: livelance/explorer
+          command: [ "/bin/sh", "-c", "cp /fabriccerts/keyfiles/explorer-connection.json /opt/explorer/app/platform/fabric/config.json && sleep 1m && node /opt/explorer/main.js" ]
+          env:
+          - name: DATABASE_HOST
+            value: localhost
+          - name: DATABASE_PASSWD
+            value: password
+          - name: DATABASE_USERNAME
+            value: hppoc
+          volumeMounts:
+          - mountPath: "/fabriccerts"
+            name: task-pv-storage
+      volumes:
+        - name: task-pv-storage
+          persistentVolumeClaim:
+              claimName: fabriccerts
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: explorer-service
+  labels:
+    run: fabric-explorer
+spec:
+  type: NodePort
+  selector:
+    name: fabric-explorer
+  ports:
+  - protocol: TCP
+    port: 8080
+    nodePort: 32003
+    name: http

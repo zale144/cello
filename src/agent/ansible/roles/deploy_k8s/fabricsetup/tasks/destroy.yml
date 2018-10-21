@@ -1,15 +1,10 @@
 ---
 - name: Reuse common code
   include_tasks: "{{ playbook_dir }}/../common/config_apply.yml"
-
-- name: Remove fabric client pod
-  command: >-
-    ./kubectl --kubeconfig='kubeconfig' delete -f {{ pjrun }}/cli-k8s.yaml
-  args:
-    chdir: "{{ playbook_dir }}/../../vars/"
-  when: (allorderers | length > 0) and (allpeers | length > 0)
-  tags: "clientdown"
-
+  
+- name: Reuse common code
+  include_tasks: "{{ playbook_dir }}/../common/config_destroy.yml"
+ 
 - name: Stop fabric pod and chaincode endpoint daemon set
   command: >-
     ./kubectl --kubeconfig='kubeconfig' delete -f {{ pjrun }}/{{ item }}
@@ -18,7 +13,32 @@
   with_items:
     - "fabric-pod.yml"
     - "chainep.yaml"
+    - "composercli.yaml"
   tags: "fabricdown"
+ 
+- name: Remove fabric client pod
+  command: >-
+    ./kubectl --kubeconfig='kubeconfig' delete -f {{ pjrun }}/cli-k8s.yaml
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  when: (allorderers | length > 0) and (allpeers | length > 0)
+  tags: "clientdown"
+  
+- name: Remove fabric permanent client pod
+  command: >-
+    ./kubectl --kubeconfig='kubeconfig' delete -f {{ pjrun }}/cli-k8s1.yaml
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  when: (allorderers | length > 0) and (allpeers | length > 0)
+  tags: "clientdown"
 
-- name: Reuse common code
-  include_tasks: "{{ playbook_dir }}/../common/config_destroy.yml"
+- name: Remove Marbles and Explorer
+  command: >-
+    ./kubectl --kubeconfig='kubeconfig' delete -f {{ pjrun }}/{{ item }}
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  with_items:
+    - "marbles.yaml"
+    - "explorer"
+  tags: "fabricdown"
+  

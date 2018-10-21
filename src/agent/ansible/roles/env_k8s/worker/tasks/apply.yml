@@ -65,7 +65,6 @@
     kubelet_params: >-
       --cloud-provider=''
       --kubeconfig=/etc/kubernetes/kubeconfig
-      --require-kubeconfig
       --container-runtime=docker
       --cluster-dns={{ cluster.dns_service_ip }}
       --cluster-domain={{ cluster.domain }}

@@ -1,0 +1,29 @@
+---
+- name: Reuse common code
+  include_tasks: "{{ playbook_dir }}/../common/config_apply.yml"
+
+- meta: end_play
+  when: (allorderers | length == 0) or (allpeers | length == 0)
+
+- name: Create deployment file for explorer and marbles
+  template:
+    src: "{{ playbook_dir }}/appsetup/templates/{{ item }}.j2"
+    dest: "{{ pjrun }}/{{ item }}.yaml"
+  with_items:
+    - explorer
+    - marbles
+
+- name: Setup Explorer
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create -f {{ pjrun }}/explorer.yaml
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  tags: "setupexplorer"
+  
+- name: Setup Marbles
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create -f {{ pjrun }}/marbles.yaml
+  args:
+    chdir: "{{ playbook_dir }}/../../vars/"
+  tags: "setupmarbles"
+  

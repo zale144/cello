@@ -13,7 +13,9 @@ spec:
        claimName: fabriccerts
   containers:
     - name: composerplayground
-      image: hyperledger/composer-playground:next
+      image: hyperledger/composer-playground:latest
+      securityContext:
+        runAsUser: 0
       volumeMounts:
         - mountPath: "/fabriccerts"
           name: task-pv-storage
