@@ -39,6 +39,6 @@
     chdir: "{{ playbook_dir }}/../../vars/"
   with_items:
     - "marbles.yaml"
-    - "explorer"
+    - "explorer.yaml"
   tags: "fabricdown"
   
