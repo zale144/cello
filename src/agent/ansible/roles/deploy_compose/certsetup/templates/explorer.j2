@@ -53,10 +53,10 @@
                 "path": "/root/.hfc-key-store"
             },
             "signedCert": {
-                  "path": "{{ fabricworkdir+'/run/keyfiles/'+org+'/users/Admin@'+org+'/msp/admincerts/' }}"
+                  "path": "{{ '/fabriccerts/keyfiles/'+org+'/users/Admin@'+org+'/msp/admincerts/Admin@'+org+'-cert.pem' }}"
             },
             "adminPrivateKey": {
-                  "path": "{{ fabricworkdir+'/run/keyfiles/'+org+'/users/Admin@'+org+'/msp/keystore/' }}"
+                  "path": "{{ '/fabriccerts/keyfiles/'+org+'/users/Admin@'+org+'/msp/keystore/admin_private.key' }}"
             }
         }{{ '' if loop.last else ',' }}
 {% endfor %}
@@ -70,7 +70,7 @@
         "ssl-target-name-override": "{{ peer.name }}"
       },
       "tlsCACerts": {
-        "pem": "{{ fabricworkdir+'/run/keyfiles/'+peer.org+'/tlsca/tlsca.'+peer.org+'-cert.pem' }}"
+        "pem": "{{ '/fabriccerts/keyfiles/'+peer.org+'/tlsca/tlsca.'+peer.org+'-cert.pem' }}"
       }
     }{{ '' if loop.last else ',' }}
 {% endfor %}
@@ -83,14 +83,14 @@
         "ssl-target-name-override": "{{ orderer.name }}"
       },
       "tlsCACerts": {
-        "pem": "{{ fabricworkdir+'/run/keyfiles/'+orderer.org+'/orderers/'+orderer.name+'.'+orderer.org+'/tls/ca.crt' }}"
+        "pem": "{{ '/fabriccerts/keyfiles/'+orderer.org+'/orderers/'+orderer.name+'.'+orderer.org+'/tls/ca.crt' }}"
       }
     }{{ '' if loop.last else ',' }}
 {% endfor %}
         }
       }
   },
-  "configtxgenToolPath": "{{ fabricworkdir+'/run/keyfiles' }}",
+  "configtxgenToolPath": "{{ '/fabriccerts/run/keyfiles' }}",
   "license": "Apache-2.0"
 }
 

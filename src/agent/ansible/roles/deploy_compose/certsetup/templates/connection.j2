@@ -52,7 +52,7 @@
         "ssl-target-name-override": "{{ orderer.name }}"
       },
       "tlsCACerts": {
-        "pem": "{{ fabricworkdir+'/run/keyfiles/'+orderer.org+'/orderers/'+orderer.name+'.'+orderer.org+'/tls/ca.crt' }}"
+        "pem": "{{ '/fabriccerts/keyfiles/'+orderer.org+'/orderers/'+orderer.name+'.'+orderer.org+'/tls/ca.crt' }}"
       }
     }{{ '' if loop.last else ',' }}
 {% endfor %}
@@ -66,7 +66,7 @@
         "ssl-target-name-override": "{{ peer.name }}"
       },
       "tlsCACerts": {
-        "pem": "{{ fabricworkdir+'/run/keyfiles/'+peer.org+'/tlsca/tlsca.'+peer.org+'-cert.pem' }}"
+        "pem": "{{ '/fabriccerts/keyfiles/'+peer.org+'/tlsca/tlsca.'+peer.org+'-cert.pem' }}"
       }
     }{{ '' if loop.last else ',' }}
 {% endfor %}
